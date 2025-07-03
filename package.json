@@ -1,0 +1,50 @@
+{
+    "name": "universal-ecommerce-backend",
+    "version": "1.0.0",
+    "main": "src/server.js",
+    "license": "MIT",
+    "private": true,
+    "author": {
+        "name": "Md Sakibul Islam",
+        "email": "sakibul.islam0808@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sakib-xrz/universal-ecommerce-backend"
+    },
+    "scripts": {
+        "dev": "nodemon src/server.js",
+        "start": "node src/server.js",
+        "seed": "node prisma/seed.js",
+        "migrate": "npx prisma migrate dev",
+        "studio": "npx prisma studio"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.0.0",
+        "bcrypt": "^5.1.1",
+        "body-parser": "^1.20.3",
+        "cloudinary": "^2.5.0",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "date-fns": "^4.1.0",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.0",
+        "http-status": "^1.7.4",
+        "jsonwebtoken": "^9.0.2",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "node-cron": "^3.0.3",
+        "nodemailer": "^6.9.15",
+        "slugify": "^1.6.6",
+        "uuid": "^10.0.0",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3",
+        "eslint": "^9.11.0",
+        "eslint-config-prettier": "^9.1.0",
+        "nodemon": "^3.1.7",
+        "prettier": "^3.3.3",
+        "prisma": "^6.0.0"
+    }
+}
