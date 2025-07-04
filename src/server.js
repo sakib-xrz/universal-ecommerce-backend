@@ -1,5 +1,7 @@
-const config = require('./config');
-const app = require('./app');
+const app = require('./app.js');
+const config = require('./config/index.js');
+const { createServer } = require('http');
+const { initSocket } = require('./config/socket.js');
 
 process.on('uncaughtException', err => {
     console.error(err);
@@ -9,8 +11,17 @@ process.on('uncaughtException', err => {
 let server;
 
 async function startServer() {
-    server = app.listen(config.port, () => {
+    // Create HTTP server
+    const httpServer = createServer(app);
+
+    // Initialize Socket.io
+    initSocket(httpServer);
+
+    server = httpServer.listen(config.port, () => {
         console.log(`🎯 Server listening on port: ${config.port}`);
+        console.log(
+            `🔌 Socket.io initialized and ready for connections`
+        );
     });
 
     process.on('unhandledRejection', error => {
@@ -25,10 +36,11 @@ async function startServer() {
     });
 }
 
-startServer();
-
 process.on('SIGTERM', () => {
+    console.log('SIGTERM received');
     if (server) {
         server.close();
     }
 });
+
+startServer();

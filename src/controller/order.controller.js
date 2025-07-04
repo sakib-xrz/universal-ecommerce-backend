@@ -6,6 +6,7 @@ const ApiError = require('../error/ApiError.js');
 const generateOrderId = require('../utils/generateOrderId.js');
 const config = require('../config/index.js');
 const calculateTotalPrice = require('../utils/calculateTotalPrice.js');
+const { emitNewOrderNotification } = require('../config/socket.js');
 const {
     PlatformOrder,
     UserRole,
@@ -50,7 +51,8 @@ const createOrder = catchAsync(async (req, res) => {
         async transactionClient => {
             if (!profile) {
                 const hashedPassword = await bcrypt.hash(
-                    config.default_user_password,
+                    Math.random().toString(36).substring(2, 15) +
+                        Math.random().toString(36).substring(2, 15),
                     Number(config.bcrypt_salt_rounds)
                 );
 
@@ -277,6 +279,24 @@ const createOrder = catchAsync(async (req, res) => {
             };
         }
     );
+
+    // Emit Socket.io notification for new order
+    try {
+        emitNewOrderNotification({
+            order_id: result.order_id,
+            customer_name: result.customer_name,
+            email: result.email,
+            phone: result.phone,
+            subtotal: result.subtotal,
+            delivery_charge: result.delivery_charge,
+            grand_total: result.grand_total,
+            platform: result.platform,
+            created_at: result.created_at
+        });
+    } catch (socketError) {
+        console.error('Socket.io notification failed:', socketError);
+        // Don't fail the order creation if socket notification fails
+    }
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,

@@ -488,7 +488,6 @@ const getAdminProducts = catchAsync(async (req, res) => {
                 discount: true,
                 discount_type: true,
                 is_published: true,
-                is_featured: true,
                 category: { select: { name: true } },
                 images: { select: { image_url: true, type: true } },
                 variants: {

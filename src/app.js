@@ -13,15 +13,7 @@ const app = express();
 // middlewares
 app.use(
     cors({
-        origin: [
-            'https://letzgear.com',
-            'https://admin.letzgear.com',
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'https://letzgear-admin.vercel.app',
-            'https://letzgear-frontend.vercel.app',
-            'https://www.letzgear.com'
-        ],
+        origin: ['http://localhost:3000', 'http://localhost:3001'],
         credentials: true
     })
 );
