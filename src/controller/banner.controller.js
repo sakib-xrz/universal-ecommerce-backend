@@ -5,7 +5,8 @@ const ApiError = require('../error/ApiError.js');
 const httpStatus = require('http-status');
 const {
     uploadToCloudinary,
-    deleteFromCloudinary
+    deleteFromCloudinary,
+    getCloudinaryIdFromUrl
 } = require('../utils/handelFile.js');
 
 const createBannerImage = catchAsync(async (req, res) => {
@@ -33,8 +34,7 @@ const createBannerImage = catchAsync(async (req, res) => {
 
     const bannerImage = await prisma.banner.create({
         data: {
-            image_url: result.secure_url,
-            cloudinary_id: result.public_id
+            image_url: result.secure_url
         }
     });
 
@@ -58,6 +58,68 @@ const getBannerImages = catchAsync(async (_req, res) => {
         statusCode: httpStatus.OK,
         success: true,
         data: bannerImages
+    });
+});
+
+const updateBannerImage = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const file = req.file;
+
+    if (!file) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            'File is required'
+        );
+    }
+
+    const bannerImage = await prisma.banner.findUnique({
+        where: {
+            id
+        }
+    });
+
+    if (!bannerImage) {
+        throw new ApiError(
+            httpStatus.NOT_FOUND,
+            'Banner image not found'
+        );
+    }
+
+    //  need a utils function to get the cloudinary id from the image url
+    const cloudinaryId = getCloudinaryIdFromUrl(
+        bannerImage.image_url
+    );
+
+    // first delete the old image from cloudinary then upload the new image
+    await deleteFromCloudinary(cloudinaryId);
+
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const fileType = file.mimetype.split('/').pop();
+
+    const options = {
+        folder: '/ecommerce/banner',
+        filename_override: fileName,
+        format: fileType,
+        overwrite: true,
+        invalidate: true
+    };
+
+    const result = await uploadToCloudinary(file, options);
+
+    const updatedBannerImage = await prisma.banner.update({
+        where: {
+            id
+        },
+        data: {
+            image_url: result.secure_url
+        }
+    });
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Banner image updated successfully',
+        data: updatedBannerImage
     });
 });
 
@@ -95,7 +157,8 @@ const deleteBannerImage = catchAsync(async (req, res) => {
 const BannerController = {
     createBannerImage,
     getBannerImages,
-    deleteBannerImage
+    deleteBannerImage,
+    updateBannerImage
 };
 
 module.exports = BannerController;

@@ -16,6 +16,13 @@ router.post(
 
 router.get('/', BannerController.getBannerImages);
 
+router.put(
+    '/:id',
+    authGuard(UserRole.SUPER_ADMIN),
+    upload.single('image'),
+    BannerController.updateBannerImage
+);
+
 router.delete(
     '/:id',
     authGuard(UserRole.SUPER_ADMIN),

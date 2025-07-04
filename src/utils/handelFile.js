@@ -119,9 +119,36 @@ const deleteFromCloudinary = async publicIds => {
     });
 };
 
+const getCloudinaryIdFromUrl = url => {
+    try {
+        const urlParts = url.split('/');
+        const uploadIndex = urlParts.findIndex(
+            part => part === 'upload'
+        );
+        if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
+            const publicIdWithExtension = urlParts
+                .slice(uploadIndex + 2)
+                .join('/');
+            const publicId = publicIdWithExtension.replace(
+                /\.[^/.]+$/,
+                ''
+            );
+            return publicId;
+        }
+        return null;
+    } catch (error) {
+        console.log(
+            'Error from cloudinary while extracting public id',
+            error
+        );
+        return null;
+    }
+};
+
 // Improved error handling and export
 module.exports = {
     upload,
     uploadToCloudinary,
-    deleteFromCloudinary
+    deleteFromCloudinary,
+    getCloudinaryIdFromUrl
 };
