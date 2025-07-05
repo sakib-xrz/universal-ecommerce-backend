@@ -70,6 +70,12 @@ enum NotificationType {
   USER
 }
 
+enum StaticPageKind {
+  ABOUT_US
+  PRIVACY_POLICY
+  TERMS_AND_CONDITIONS
+}
+
 // Start Prisma Schema
 
 model User {
@@ -273,4 +279,36 @@ model FeaturedCategory {
   updated_at         DateTime @updatedAt
 
   @@map("featured_categories")
+}
+
+model Setting {
+  id                    String   @id @default(uuid())
+  logo                  String
+  address               String
+  phone                 String
+  email                 String
+  facebook              String?
+  instagram             String?
+  title                 String
+  description           String
+  keywords              String
+  google_analytics_id   String?
+  google_tag_manager_id String?
+  facebook_pixel_id     String?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model StaticPage {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  kind        StaticPageKind
+  content     String
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  @@map("static_pages")
 }

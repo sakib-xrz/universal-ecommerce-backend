@@ -16,6 +16,8 @@ const bannerRoutes = require('../apis/banner/index.js');
 const cartRoutes = require('../apis/cart/index.js');
 const dashboardRoutes = require('../apis/dashboard/index.js');
 const featuredCategoryRoutes = require('../apis/featured-category/index.js');
+const settingRoutes = require('../apis/setting/index.js');
+const staticPageRoutes = require('../apis/static-page/index.js');
 
 const router = Router();
 
@@ -83,6 +85,14 @@ const routes = [
     {
         path: '/featured-categories',
         route: featuredCategoryRoutes
+    },
+    {
+        path: '/settings',
+        route: settingRoutes
+    },
+    {
+        path: '/static-pages',
+        route: staticPageRoutes
     }
 ];
 
