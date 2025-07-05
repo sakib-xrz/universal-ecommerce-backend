@@ -15,6 +15,7 @@ const menuRoutes = require('../apis/menu/index.js');
 const bannerRoutes = require('../apis/banner/index.js');
 const cartRoutes = require('../apis/cart/index.js');
 const dashboardRoutes = require('../apis/dashboard/index.js');
+const featuredCategoryRoutes = require('../apis/featured-category/index.js');
 
 const router = Router();
 
@@ -78,6 +79,10 @@ const routes = [
     {
         path: '/dashboard',
         route: dashboardRoutes
+    },
+    {
+        path: '/featured-categories',
+        route: featuredCategoryRoutes
     }
 ];
 

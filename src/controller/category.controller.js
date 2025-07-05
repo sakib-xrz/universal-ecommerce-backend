@@ -111,13 +111,15 @@ const getAllCategoriesList = catchAsync(async (_req, res) => {
     const flatList = categories.flatMap(category => {
         const parentCategory = {
             id: category.id,
-            name: category.name
+            name: category.name,
+            is_published: category.is_published
         };
 
         const subCategories = category.sub_categories.map(
             subCategory => ({
                 id: subCategory.id,
-                name: subCategory.name
+                name: subCategory.name,
+                is_published: subCategory.is_published
             })
         );
 

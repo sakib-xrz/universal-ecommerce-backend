@@ -102,17 +102,18 @@ model Profile {
 }
 
 model Category {
-  id                 String     @id @default(uuid())
+  id                 String             @id @default(uuid())
   parent_category_id String?
   name               String
-  slug               String     @unique
-  image              String?    @default("https://res.cloudinary.com/dl5rlskcv/image/upload/v1735927163/default-category_xehkv7.jpg")
-  is_published       Boolean    @default(false)
-  sub_categories     Category[] @relation("CategoryToCategory")
-  parent_category    Category?  @relation("CategoryToCategory", fields: [parent_category_id], references: [id], onDelete: Cascade)
+  slug               String             @unique
+  image              String?            @default("https://res.cloudinary.com/dl5rlskcv/image/upload/v1735927163/default-category_xehkv7.jpg")
+  is_published       Boolean            @default(false)
+  sub_categories     Category[]         @relation("CategoryToCategory")
+  featured_category  FeaturedCategory[]
+  parent_category    Category?          @relation("CategoryToCategory", fields: [parent_category_id], references: [id], onDelete: Cascade)
   product            Product[]
-  created_at         DateTime   @default(now())
-  updated_at         DateTime   @updatedAt
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
 
   @@map("categories")
 }
@@ -257,4 +258,19 @@ model Banner {
   updated_at DateTime @updatedAt
 
   @@map("banners")
+}
+
+model FeaturedCategory {
+  id                 String   @id @default(uuid())
+  category_id        String   @unique
+  title              String
+  banner_url         String?
+  youtube_video_link String?
+  sort_order         Int?
+  is_published       Boolean  @default(true)
+  category           Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("featured_categories")
 }
