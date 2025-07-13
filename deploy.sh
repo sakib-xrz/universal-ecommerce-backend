@@ -8,8 +8,5 @@ git pull origin main
  
 echo "Installing Dependencies..."
 npm install --yes
-
-echo "Building the app..."
-npm run build
  
 echo "Deployment Completed Successfully!"
