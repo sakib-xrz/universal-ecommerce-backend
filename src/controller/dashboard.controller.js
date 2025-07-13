@@ -226,7 +226,10 @@ const getDashboardStats = catchAsync(async (req, res) => {
 
     // Current month orders (all statuses for order count)
     const currentMonthOrders = await prisma.order.count({
-        where: { created_at: { gte: startOfMonth } }
+        where: {
+            created_at: { gte: startOfMonth },
+            status: OrderStatus.DELIVERED
+        }
     });
 
     // Current month revenue (ONLY DELIVERED orders)
@@ -241,7 +244,11 @@ const getDashboardStats = catchAsync(async (req, res) => {
     // Last month orders (all statuses for order count)
     const lastMonthOrders = await prisma.order.count({
         where: {
-            created_at: { gte: startOfLastMonth, lte: endOfLastMonth }
+            created_at: {
+                gte: startOfLastMonth,
+                lte: endOfLastMonth
+            },
+            status: OrderStatus.DELIVERED
         }
     });
 
@@ -485,12 +492,11 @@ const getProfitAnalysis = catchAsync(async (req, res) => {
         1
     );
 
-    // Calculate profit for delivered orders ONLY
+    // Calculate profit for delivered orders ONLY using actual transaction data
     const profitData = await prisma.$queryRaw`
         SELECT 
-            SUM(oi.total_price) as total_revenue,
-            SUM(oi.quantity * p.cost_price) as total_cost,
-            SUM(oi.total_price - (oi.quantity * p.cost_price)) as total_profit
+            SUM(oi.total_price - (oi.quantity * (p.buy_price + p.cost_price))) as total_profit,
+            SUM(oi.total_price) as total_revenue
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         JOIN orders o ON oi.order_id = o.order_id
@@ -500,24 +506,22 @@ const getProfitAnalysis = catchAsync(async (req, res) => {
     // Monthly profit (ONLY DELIVERED orders)
     const monthlyProfitData = await prisma.$queryRaw`
         SELECT 
-            SUM(oi.total_price) as monthly_revenue,
-            SUM(oi.quantity * p.cost_price) as monthly_cost,
-            SUM(oi.total_price - (oi.quantity * p.cost_price)) as monthly_profit
+            SUM(oi.total_price - (oi.quantity * (p.buy_price + p.cost_price))) as monthly_profit,
+            SUM(oi.total_price) as monthly_revenue
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         JOIN orders o ON oi.order_id = o.order_id
         WHERE o.status = 'DELIVERED' AND o.created_at >= ${startOfMonth}
     `;
 
-    const totalRevenue = profitData[0]?.total_revenue || 0;
-    const totalCost = profitData[0]?.total_cost || 0;
     const totalProfit = profitData[0]?.total_profit || 0;
+    const totalRevenue = profitData[0]?.total_revenue || 0;
+    const monthlyProfit = monthlyProfitData[0]?.monthly_profit || 0;
+    const monthlyRevenue = monthlyProfitData[0]?.monthly_revenue || 0;
+
+    // Calculate profit margins
     const profitMargin =
         totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
-
-    const monthlyRevenue = monthlyProfitData[0]?.monthly_revenue || 0;
-    const monthlyCost = monthlyProfitData[0]?.monthly_cost || 0;
-    const monthlyProfit = monthlyProfitData[0]?.monthly_profit || 0;
     const monthlyProfitMargin =
         monthlyRevenue > 0
             ? (monthlyProfit / monthlyRevenue) * 100
@@ -528,13 +532,9 @@ const getProfitAnalysis = catchAsync(async (req, res) => {
         statusCode: httpStatus.OK,
         message: 'Profit analysis fetched successfully',
         data: {
-            total_revenue: Math.round(totalRevenue * 100) / 100,
-            total_cost: Math.round(totalCost * 100) / 100,
             total_profit: Math.round(totalProfit * 100) / 100,
-            profit_margin: Math.round(profitMargin * 100) / 100,
-            monthly_revenue: Math.round(monthlyRevenue * 100) / 100,
-            monthly_cost: Math.round(monthlyCost * 100) / 100,
             monthly_profit: Math.round(monthlyProfit * 100) / 100,
+            profit_margin: Math.round(profitMargin * 100) / 100,
             monthly_profit_margin:
                 Math.round(monthlyProfitMargin * 100) / 100
         }
