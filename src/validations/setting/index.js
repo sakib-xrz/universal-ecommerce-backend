@@ -2,30 +2,6 @@ const { z } = require('zod');
 
 const CreateSetting = z.object({
     body: z.object({
-        address: z
-            .string({
-                required_error: 'Address is required',
-                invalid_type_error: 'Address must be a string'
-            })
-            .min(10, {
-                message: 'Address must be at least 10 characters long'
-            }),
-        phone: z
-            .string({
-                required_error: 'Phone is required',
-                invalid_type_error: 'Phone must be a string'
-            })
-            .min(10, {
-                message: 'Phone must be at least 10 characters long'
-            }),
-        email: z
-            .string({
-                required_error: 'Email is required',
-                invalid_type_error: 'Email must be a string'
-            })
-            .email({
-                message: 'Invalid email address'
-            }),
         facebook: z
             .string({
                 invalid_type_error: 'Facebook must be a string'
@@ -96,30 +72,6 @@ const CreateSetting = z.object({
 
 const UpdateSetting = z.object({
     body: z.object({
-        address: z
-            .string({
-                invalid_type_error: 'Address must be a string'
-            })
-            .min(10, {
-                message: 'Address must be at least 10 characters long'
-            })
-            .optional(),
-        phone: z
-            .string({
-                invalid_type_error: 'Phone must be a string'
-            })
-            .min(10, {
-                message: 'Phone must be at least 10 characters long'
-            })
-            .optional(),
-        email: z
-            .string({
-                invalid_type_error: 'Email must be a string'
-            })
-            .email({
-                message: 'Invalid email address'
-            })
-            .optional(),
         facebook: z
             .string({
                 invalid_type_error: 'Facebook must be a string'
