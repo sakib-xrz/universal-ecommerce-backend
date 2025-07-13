@@ -13,7 +13,14 @@ const app = express();
 // middlewares
 app.use(
     cors({
-        origin: ['http://localhost:3000', 'http://localhost:3001'],
+        origin: [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'https://purplehousebd.com',
+            'https://www.purplehousebd.com',
+            'https://admin.purplehousebd.com',
+            'https://www.admin.purplehousebd.com'
+        ],
         credentials: true
     })
 );
