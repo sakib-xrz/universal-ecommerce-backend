@@ -13,7 +13,7 @@ cloudinary.config({
 
 // File type validation
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx/;
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|ico/;
     const extname = allowedTypes.test(
         path.extname(file.originalname).toLowerCase()
     );

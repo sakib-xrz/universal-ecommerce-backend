@@ -11,7 +11,7 @@ const {
 
 // Create Setting (should be only one setting record)
 const createSetting = catchAsync(async (req, res) => {
-    const { file } = req;
+    const { files } = req;
     const {
         address,
         phone,
@@ -35,7 +35,10 @@ const createSetting = catchAsync(async (req, res) => {
         );
     }
 
-    if (!file) {
+    const logoFile = files?.logo?.[0];
+    const faviconFile = files?.favicon?.[0];
+
+    if (!logoFile) {
         throw new ApiError(
             httpStatus.BAD_REQUEST,
             'Logo file is required'
@@ -48,6 +51,7 @@ const createSetting = catchAsync(async (req, res) => {
             const setting = await transactionClient.setting.create({
                 data: {
                     logo: '', // Will be updated after file upload
+                    favicon: '', // Will be updated after file upload
                     address,
                     phone,
                     email,
@@ -63,32 +67,54 @@ const createSetting = catchAsync(async (req, res) => {
             });
 
             // Upload logo to Cloudinary
-            const fileName = `${Date.now()}-${file.originalname}`;
-            const fileType = file.mimetype.split('/').pop();
+            const logoFileName = `${Date.now()}-${logoFile.originalname}`;
+            const logoFileType = logoFile.mimetype.split('/').pop();
 
-            const cloudinaryResponse = await uploadToCloudinary(
-                file,
+            const logoCloudinaryResponse = await uploadToCloudinary(
+                logoFile,
                 {
                     folder: `/ecommerce/setting`,
-                    filename_override: fileName,
-                    format: fileType,
-                    public_id: setting.id,
+                    filename_override: logoFileName,
+                    format: logoFileType,
+                    public_id: `${setting.id}-logo`,
                     overwrite: true,
                     invalidate: true
                 }
             );
 
-            // Update setting with logo URL
+            let faviconUrl = '';
+            // Upload favicon to Cloudinary if provided
+            if (faviconFile) {
+                const faviconFileName = `${Date.now()}-${faviconFile.originalname}`;
+                const faviconFileType = faviconFile.mimetype
+                    .split('/')
+                    .pop();
+
+                const faviconCloudinaryResponse =
+                    await uploadToCloudinary(faviconFile, {
+                        folder: `/ecommerce/setting`,
+                        filename_override: faviconFileName,
+                        format: faviconFileType,
+                        public_id: `${setting.id}-favicon`,
+                        overwrite: true,
+                        invalidate: true
+                    });
+                faviconUrl = faviconCloudinaryResponse.secure_url;
+            }
+
+            // Update setting with logo and favicon URLs
             await transactionClient.setting.update({
                 where: {
                     id: setting.id
                 },
                 data: {
-                    logo: cloudinaryResponse.secure_url
+                    logo: logoCloudinaryResponse.secure_url,
+                    favicon: faviconUrl
                 }
             });
 
-            setting.logo = cloudinaryResponse.secure_url;
+            setting.logo = logoCloudinaryResponse.secure_url;
+            setting.favicon = faviconUrl;
             return setting;
         }
     );
@@ -120,7 +146,7 @@ const getSetting = catchAsync(async (req, res) => {
 // Update Setting
 const updateSetting = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const { file } = req;
+    const { files } = req;
     const {
         address,
         phone,
@@ -143,12 +169,16 @@ const updateSetting = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.NOT_FOUND, 'Setting not found');
     }
 
+    const logoFile = files?.logo?.[0];
+    const faviconFile = files?.favicon?.[0];
+
     const result = await prisma.$transaction(
         async transactionClient => {
             let logoUrl = existingSetting.logo;
+            let faviconUrl = existingSetting.favicon;
 
             // If new logo file is provided, upload it
-            if (file) {
+            if (logoFile) {
                 // Delete old logo from Cloudinary if it exists
                 if (existingSetting.logo) {
                     try {
@@ -165,22 +195,58 @@ const updateSetting = catchAsync(async (req, res) => {
                 }
 
                 // Upload new logo
-                const fileName = `${Date.now()}-${file.originalname}`;
-                const fileType = file.mimetype.split('/').pop();
+                const logoFileName = `${Date.now()}-${logoFile.originalname}`;
+                const logoFileType = logoFile.mimetype
+                    .split('/')
+                    .pop();
 
-                const cloudinaryResponse = await uploadToCloudinary(
-                    file,
-                    {
+                const logoCloudinaryResponse =
+                    await uploadToCloudinary(logoFile, {
                         folder: `/ecommerce/setting`,
-                        filename_override: fileName,
-                        format: fileType,
-                        public_id: id,
+                        filename_override: logoFileName,
+                        format: logoFileType,
+                        public_id: `${id}-logo`,
                         overwrite: true,
                         invalidate: true
-                    }
-                );
+                    });
 
-                logoUrl = cloudinaryResponse.secure_url;
+                logoUrl = logoCloudinaryResponse.secure_url;
+            }
+
+            // If new favicon file is provided, upload it
+            if (faviconFile) {
+                // Delete old favicon from Cloudinary if it exists
+                if (existingSetting.favicon) {
+                    try {
+                        const cloudinaryId = getCloudinaryIdFromUrl(
+                            existingSetting.favicon
+                        );
+                        await deleteFromCloudinary(cloudinaryId);
+                    } catch (error) {
+                        console.warn(
+                            'Failed to delete old favicon from Cloudinary:',
+                            error
+                        );
+                    }
+                }
+
+                // Upload new favicon
+                const faviconFileName = `${Date.now()}-${faviconFile.originalname}`;
+                const faviconFileType = faviconFile.mimetype
+                    .split('/')
+                    .pop();
+
+                const faviconCloudinaryResponse =
+                    await uploadToCloudinary(faviconFile, {
+                        folder: `/ecommerce/setting`,
+                        filename_override: faviconFileName,
+                        format: faviconFileType,
+                        public_id: `${id}-favicon`,
+                        overwrite: true,
+                        invalidate: true
+                    });
+
+                faviconUrl = faviconCloudinaryResponse.secure_url;
             }
 
             // Update setting
@@ -188,6 +254,7 @@ const updateSetting = catchAsync(async (req, res) => {
                 where: { id },
                 data: {
                     logo: logoUrl,
+                    favicon: faviconUrl,
                     address,
                     phone,
                     email,
@@ -236,6 +303,21 @@ const deleteSetting = catchAsync(async (req, res) => {
         } catch (error) {
             console.warn(
                 'Failed to delete logo from Cloudinary:',
+                error
+            );
+        }
+    }
+
+    // Delete favicon from Cloudinary if it exists
+    if (existingSetting.favicon) {
+        try {
+            const cloudinaryId = getCloudinaryIdFromUrl(
+                existingSetting.favicon
+            );
+            await deleteFromCloudinary(cloudinaryId);
+        } catch (error) {
+            console.warn(
+                'Failed to delete favicon from Cloudinary:',
                 error
             );
         }

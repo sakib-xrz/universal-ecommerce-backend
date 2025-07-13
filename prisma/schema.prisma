@@ -284,6 +284,7 @@ model FeaturedCategory {
 model Setting {
   id                    String   @id @default(uuid())
   logo                  String
+  favicon               String?
   address               String
   phone                 String
   email                 String

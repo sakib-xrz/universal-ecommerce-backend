@@ -12,7 +12,10 @@ const router = Router();
 router.post(
     '/',
     authGuard(UserRole.SUPER_ADMIN),
-    upload.single('logo'),
+    upload.fields([
+        { name: 'logo', maxCount: 1 },
+        { name: 'favicon', maxCount: 1 }
+    ]),
     validateRequest(SettingValidation.CreateSetting),
     SettingController.createSetting
 );
@@ -24,7 +27,10 @@ router.get('/', SettingController.getSetting);
 router.patch(
     '/:id',
     authGuard(UserRole.SUPER_ADMIN),
-    upload.single('logo'),
+    upload.fields([
+        { name: 'logo', maxCount: 1 },
+        { name: 'favicon', maxCount: 1 }
+    ]),
     validateRequest(SettingValidation.UpdateSetting),
     SettingController.updateSetting
 );
