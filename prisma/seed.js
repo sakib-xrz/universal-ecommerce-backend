@@ -37,6 +37,19 @@ const seedSuperAdmin = async () => {
             email: 'superadmin@ecommerce.com',
             password: '123456'
         });
+
+        await prisma.setting.create({
+            data: {
+                title: 'Ecommerce',
+                description: 'Ecommerce',
+                keywords: 'Ecommerce',
+                logo: '',
+                favicon: '',
+                address: 'Dhaka, Bangladesh',
+                phone: '+8801000000000',
+                email: 'superadmin@ecommerce.com'
+            }
+        });
     } catch (err) {
         console.error(err);
     } finally {
