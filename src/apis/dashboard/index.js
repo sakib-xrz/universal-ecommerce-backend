@@ -24,4 +24,10 @@ router.get(
     DashboardController.getSalesAnalytics
 );
 
+router.get(
+    '/stats',
+    authGuard(UserRole.SUPER_ADMIN),
+    DashboardController.getDashboardStats
+);
+
 module.exports = router;

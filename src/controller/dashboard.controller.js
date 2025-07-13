@@ -190,10 +190,96 @@ const getSalesAnalytics = catchAsync(async (req, res) => {
     });
 });
 
+// New endpoint for general dashboard statistics
+const getDashboardStats = catchAsync(async (req, res) => {
+    const now = new Date();
+    const startOfMonth = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+    );
+    const startOfLastMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1
+    );
+    const endOfLastMonth = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        0
+    );
+
+    // Current month stats
+    const currentMonthOrders = await prisma.order.count({
+        where: {
+            created_at: {
+                gte: startOfMonth
+            }
+        }
+    });
+
+    // Last month stats
+    const lastMonthOrders = await prisma.order.count({
+        where: {
+            created_at: {
+                gte: startOfLastMonth,
+                lte: endOfLastMonth
+            }
+        }
+    });
+
+    // Calculate growth
+    const orderGrowth =
+        lastMonthOrders > 0
+            ? ((currentMonthOrders - lastMonthOrders) /
+                  lastMonthOrders) *
+              100
+            : 0;
+
+    // Recent customers (last 30 days)
+    const recentCustomers = await prisma.user.count({
+        where: {
+            role: UserRole.CUSTOMER,
+            created_at: {
+                gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            }
+        }
+    });
+
+    // Total products
+    const totalProducts = await prisma.product.count({
+        where: {
+            is_deleted: false
+        }
+    });
+
+    // Total categories
+    const totalCategories = await prisma.category.count({
+        where: {
+            is_published: true // Only count published categories
+        }
+    });
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Dashboard statistics fetched successfully',
+        data: {
+            current_month_orders: currentMonthOrders,
+            last_month_orders: lastMonthOrders,
+            order_growth: orderGrowth,
+            recent_customers: recentCustomers,
+            total_products: totalProducts,
+            total_categories: totalCategories
+        }
+    });
+});
+
 const DashboardController = {
     getCustomerAnalytics,
     getOrderAnalytics,
-    getSalesAnalytics
+    getSalesAnalytics,
+    getDashboardStats
 };
 
 module.exports = DashboardController;
