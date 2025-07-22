@@ -51,6 +51,9 @@ const getBannerImages = catchAsync(async (_req, res) => {
         select: {
             id: true,
             image_url: true
+        },
+        orderBy: {
+            created_at: 'asc'
         }
     });
 

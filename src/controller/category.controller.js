@@ -148,6 +148,9 @@ const getAllParentCategoriesList = catchAsync(async (_req, res) => {
             name: true,
             image: true,
             slug: true
+        },
+        orderBy: {
+            created_at: 'asc'
         }
     });
 
