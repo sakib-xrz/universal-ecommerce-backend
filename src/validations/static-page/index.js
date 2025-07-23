@@ -24,12 +24,12 @@ const CreateStaticPage = z.object({
             [
                 StaticPageKind.ABOUT_US,
                 StaticPageKind.PRIVACY_POLICY,
-                StaticPageKind.TERMS_AND_CONDITIONS
+                StaticPageKind.SHIPPING_INFORMATION
             ],
             {
                 required_error: 'Kind is required',
                 invalid_type_error:
-                    'Kind must be one of: ABOUT_US, PRIVACY_POLICY, TERMS_AND_CONDITIONS'
+                    'Kind must be one of: ABOUT_US, PRIVACY_POLICY, SHIPPING_INFORMATION'
             }
         ),
         content: z
@@ -67,11 +67,11 @@ const UpdateStaticPage = z.object({
                 [
                     StaticPageKind.ABOUT_US,
                     StaticPageKind.PRIVACY_POLICY,
-                    StaticPageKind.TERMS_AND_CONDITIONS
+                    StaticPageKind.SHIPPING_INFORMATION
                 ],
                 {
                     invalid_type_error:
-                        'Kind must be one of: ABOUT_US, PRIVACY_POLICY, TERMS_AND_CONDITIONS'
+                        'Kind must be one of: ABOUT_US, PRIVACY_POLICY, SHIPPING_INFORMATION'
                 }
             )
             .optional(),

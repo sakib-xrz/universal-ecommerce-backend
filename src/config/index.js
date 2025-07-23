@@ -35,21 +35,5 @@ module.exports = {
     emailSender: {
         email: process.env.EMAIL,
         app_pass: process.env.APP_PASS
-    },
-
-    delivery_charge: {
-        inside_dhaka: process.env.DELIVERY_CHARGE_INSIDE_DHAKA,
-        outside_dhaka: process.env.DELIVERY_CHARGE_OUTSIDE_DHAKA
-    },
-
-    ssl: {
-        store_id: process.env.SSL_STORE_ID,
-        store_pass: process.env.SSL_STORE_PASS
-    },
-
-    payment: {
-        success_url: process.env.PAYMENT_SUCCESS_URL,
-        fail_url: process.env.PAYMENT_FAIL_URL,
-        cancel_url: process.env.PAYMENT_CANCEL_URL
     }
 };

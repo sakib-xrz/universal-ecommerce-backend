@@ -158,7 +158,9 @@ const updateSetting = catchAsync(async (req, res) => {
         keywords,
         google_analytics_id,
         google_tag_manager_id,
-        facebook_pixel_id
+        facebook_pixel_id,
+        delivery_charge_inside_dhaka,
+        delivery_charge_outside_dhaka
     } = req.body;
 
     const existingSetting = await prisma.setting.findUnique({
@@ -265,7 +267,13 @@ const updateSetting = catchAsync(async (req, res) => {
                     keywords,
                     google_analytics_id,
                     google_tag_manager_id,
-                    facebook_pixel_id
+                    facebook_pixel_id,
+                    delivery_charge_inside_dhaka: Number(
+                        delivery_charge_inside_dhaka
+                    ),
+                    delivery_charge_outside_dhaka: Number(
+                        delivery_charge_outside_dhaka
+                    )
                 }
             });
 

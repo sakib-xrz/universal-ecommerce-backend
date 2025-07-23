@@ -18,9 +18,6 @@ const calculatePagination = require('../helpers/calculatePagination.js');
 const pick = require('../utils/pick.js');
 const bcrypt = require('bcrypt');
 
-const inside_dhaka = config.delivery_charge.inside_dhaka;
-const outside_dhaka = config.delivery_charge.outside_dhaka;
-
 const createOrder = catchAsync(async (req, res) => {
     let {
         user_id,
@@ -238,9 +235,12 @@ const createOrder = catchAsync(async (req, res) => {
                 (acc, item) => acc + item.total_price,
                 0
             );
+
+            const settings = await prisma.setting.findFirst();
+
             const delivery_charge = is_inside_dhaka
-                ? +inside_dhaka
-                : +outside_dhaka;
+                ? +settings.delivery_charge_inside_dhaka
+                : +settings.delivery_charge_outside_dhaka;
             const grand_total = Number(subtotal + delivery_charge);
 
             // Update order with totals
