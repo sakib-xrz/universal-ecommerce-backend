@@ -98,7 +98,6 @@ const getProductsByCategory = catchAsync(async (req, res) => {
             discount: true,
             discount_type: true,
             is_published: true,
-            is_featured: true,
             category: { select: { name: true } },
             images: { select: { image_url: true, type: true } },
             variants: {
@@ -274,7 +273,6 @@ const getCustomerProduct = catchAsync(async (req, res) => {
             discount: true,
             discount_type: true,
             is_published: true,
-            is_featured: true,
             category: { select: { name: true } },
             images: { select: { image_url: true, type: true } },
             variants: {
@@ -344,7 +342,6 @@ const getAdminProducts = catchAsync(async (req, res) => {
     const productFilterableFields = [
         'search',
         'discount_type',
-        'is_featured',
         'is_published',
         'category_id'
     ];
@@ -401,8 +398,7 @@ const getAdminProducts = catchAsync(async (req, res) => {
                       AND: Object.keys(filterData).map(field => ({
                           [field]: {
                               equals:
-                                  field === 'is_published' ||
-                                  field === 'is_featured'
+                                  field === 'is_published'
                                       ? filterData[field] === 'true'
                                       : filterData[field]
                           }
@@ -437,7 +433,6 @@ const getAdminProducts = catchAsync(async (req, res) => {
                     discount: true,
                     discount_type: true,
                     is_published: true,
-                    is_featured: true,
                     category: { select: { name: true } },
                     images: {
                         select: { image_url: true, type: true }
