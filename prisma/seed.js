@@ -41,13 +41,15 @@ const seedSuperAdmin = async () => {
         await prisma.setting.create({
             data: {
                 title: 'Ecommerce',
-                description: 'Ecommerce',
-                keywords: 'Ecommerce',
+                description: 'Best e-commerce shop in Bangladesh',
+                keywords: 'e-commerce',
                 logo: '',
                 favicon: '',
                 address: 'Dhaka, Bangladesh',
                 phone: '+8801000000000',
-                email: 'superadmin@ecommerce.com'
+                email: 'superadmin@ecommerce.com',
+                facebook: 'https://www.facebook.com/e-commerce',
+                instagram: 'https://www.instagram.com/e-commerce'
             }
         });
     } catch (err) {

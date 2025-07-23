@@ -302,9 +302,12 @@ const forgotPassword = catchAsync(async (req, res) => {
 
     const resetPassLink = `${config.frontend_base_url}/${config.reset_pass_url}?token=${resetPasswordToken}`;
 
+    const settings = await prisma.setting.findFirst();
+
     const templateData = {
         name: profile.name,
-        resetPassLink
+        resetPassLink,
+        siteName: settings.title
     };
 
     const mailBody = ResetPasswordTemplate(templateData);

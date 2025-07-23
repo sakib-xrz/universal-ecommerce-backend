@@ -1,5 +1,10 @@
 const ResetPasswordTemplate = data => {
-    const { name, resetPassLink } = data;
+    const {
+        name,
+        resetPassLink,
+        siteName = 'Your Store',
+        primaryColor = '#18181b'
+    } = data;
     return `
         <!DOCTYPE html>
         <html lang="en">
@@ -26,7 +31,7 @@ const ResetPasswordTemplate = data => {
             }
 
             .email-header {
-                background-color: #18181b;
+                background-color: ${primaryColor};
                 color: #ffffff;
                 text-align: center;
                 padding: 20px;
@@ -35,7 +40,7 @@ const ResetPasswordTemplate = data => {
             }
 
             .branding {
-                color: #18181b;
+                color: ${primaryColor};
                 font-weight: bold;
                 font-size: 24px;
                 margin: 0 0 16px;
@@ -56,7 +61,7 @@ const ResetPasswordTemplate = data => {
                 width: 200px;
                 margin: 20px auto;
                 padding: 12px 0;
-                background-color: #18181b;
+                background-color: ${primaryColor};
                 color: #ffffff !important;
                 text-align: center;
                 text-decoration: none;
@@ -66,7 +71,7 @@ const ResetPasswordTemplate = data => {
             }
 
             .reset-button:hover {
-                background-color: #18181be6;
+                background-color: ${primaryColor}e6;
             }
 
             .footer {
@@ -79,7 +84,7 @@ const ResetPasswordTemplate = data => {
             <div class="email-container">
             <div class="email-header">Password Reset</div>
             <div class="email-body">
-                <h2 class="branding">LET'Z GEAR</h2>
+                <h2 class="branding">${siteName}</h2>
                 <p>Hello ${name},</p>
                 <p>
                 We received a request to reset your password. Click the button or
@@ -88,14 +93,14 @@ const ResetPasswordTemplate = data => {
                 <a href="${resetPassLink}" class="reset-button">Reset Password</a>
 
                 <p>
-                If you’re having trouble clicking the "Reset Password" button, copy
+                If you're having trouble clicking the "Reset Password" button, copy
                 and paste the URL below into your web browser or click :
                 <a href="${resetPassLink}">${resetPassLink}</a>
                 </p>
 
                 <p>
-                If you didn’t request a password reset, you can ignore this email.
-                Your password won’t change until you access the link above and create
+                If you didn't request a password reset, you can ignore this email.
+                Your password won't change until you access the link above and create
                 a new one.
                 </p>
                 <p class="footer">Thank you!</p>
