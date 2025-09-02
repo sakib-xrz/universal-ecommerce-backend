@@ -37,7 +37,9 @@ const createOrder = catchAsync(async (req, res) => {
         }
     });
 
-    if (profile && !user_id) {
+    // For unauthenticated users, we allow orders even if email exists
+    // For authenticated users, we require user_id if profile exists
+    if (profile && !user_id && req.user) {
         throw new ApiError(
             httpStatus.BAD_REQUEST,
             'User already exists please provide user id'
@@ -72,6 +74,9 @@ const createOrder = catchAsync(async (req, res) => {
                         phone
                     }
                 });
+            } else if (profile && !user_id) {
+                // For unauthenticated users with existing profile, use the existing user_id
+                user_id = profile.user_id;
             }
 
             const order_id = generateOrderId();

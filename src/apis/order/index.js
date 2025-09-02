@@ -15,6 +15,14 @@ router
         OrderController.createOrder
     );
 
+// Guest order creation route (no authentication required)
+router
+    .route('/guest')
+    .post(
+        validateRequest(OrderValidation.CreateOrder),
+        OrderController.createOrder
+    );
+
 router
     .route('/me')
     .get(authGuard(UserRole.CUSTOMER), OrderController.getMyOrders);
