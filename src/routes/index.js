@@ -18,6 +18,7 @@ const dashboardRoutes = require('../apis/dashboard/index.js');
 const featuredCategoryRoutes = require('../apis/featured-category/index.js');
 const settingRoutes = require('../apis/setting/index.js');
 const staticPageRoutes = require('../apis/static-page/index.js');
+const pathaoRoutes = require('../apis/pathao/index.js');
 
 const router = Router();
 
@@ -93,6 +94,10 @@ const routes = [
     {
         path: '/static-pages',
         route: staticPageRoutes
+    },
+    {
+        path: '/pathao',
+        route: pathaoRoutes
     }
 ];
 

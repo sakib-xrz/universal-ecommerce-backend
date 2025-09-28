@@ -451,7 +451,8 @@ const getOrderDetails = catchAsync(async (req, res) => {
                     total_price: true
                 }
             },
-            payment: true
+            payment: true,
+            pathao_order: true
         }
     });
 

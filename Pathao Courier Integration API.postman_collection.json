@@ -1,0 +1,436 @@
+{
+	"info": {
+		"_postman_id": "a88f1416-32d1-4ea1-914b-bae311e109bf",
+		"name": "Pathao Courier Integration API",
+		"description": "Updated collection for testing Pathao Courier delivery system integration with correct paths and improved organization",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27382611",
+		"_collection_link": "https://wcc-devs.postman.co/workspace/SOLVE-MEET~db0943aa-303e-475d-a061-03d4e72c2c7b/collection/27382611-a88f1416-32d1-4ea1-914b-bae311e109bf?action=share&source=collection_link&creator=27382611"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.accessToken) {",
+									"        pm.environment.set('admin_token', response.data.accessToken);",
+									"        console.log('Admin token set successfully');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"superadmin@ecommerce.com\",\n  \"password\": \"1234567\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as admin to get access token. The token will be automatically set in environment variables."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📍 Location Services",
+			"item": [
+				{
+					"name": "Get Cities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/cities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"cities"
+							]
+						},
+						"description": "Get list of available cities for delivery"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Zones for City (Dhaka)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/cities/1/zones",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"cities",
+								"1",
+								"zones"
+							]
+						},
+						"description": "Get zones for Dhaka (city ID: 1)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Areas for Zone",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/zones/298/areas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"zones",
+								"298",
+								"areas"
+							]
+						},
+						"description": "Get areas for a specific zone (298 is a common Dhaka zone)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💰 Price & Store Services",
+			"item": [
+				{
+					"name": "Calculate Delivery Price",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Dhaka - Abdullahpur Uttara\n{\n  \"item_type\": 2,\n  \"delivery_type\": 48,\n  \"item_weight\": \"0.5\",\n  \"recipient_city\": 1,\n  \"recipient_zone\": 3069\n}\n\n// Dhaka - Abul Hotel\n// {\n//   \"item_type\": 2,\n//   \"delivery_type\": 48,\n//   \"item_weight\": \"0.5\",\n//   \"recipient_city\": 1,\n//   \"recipient_zone\": 1066\n// }"
+						},
+						"url": {
+							"raw": "{{base_url}}/pathao/price/calculate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"price",
+								"calculate"
+							]
+						},
+						"description": "Calculate delivery price for given location and item details"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Stores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/stores",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"stores"
+							]
+						},
+						"description": "Get merchant store information"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📦 Order Management",
+			"item": [
+				{
+					"name": "Get All Pathao Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/orders?page=1&limit=10&search=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get all Pathao orders with pagination and search"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pathao Order Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/orders/ORD-TEST-001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"orders",
+								"ORD-TEST-001"
+							]
+						},
+						"description": "Get detailed information about a specific Pathao order. Update the order ID in the URL."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pathao Order Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pathao_status\": \"Delivered\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/pathao/orders/ORD-TEST-001/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"orders",
+								"ORD-TEST-001",
+								"status"
+							]
+						},
+						"description": "Update the status of a Pathao order. Update the order ID in the URL."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pathao Order Info by Consignment ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/pathao/orders/info/PATH123456",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"orders",
+								"info",
+								"PATH123456"
+							]
+						},
+						"description": "Get order information from Pathao using consignment ID. Update the consignment ID in the URL."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🚚 Create Orders",
+			"item": [
+				{
+					"name": "Create Pathao Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"order_id\": \"ORD-TEST-001\",\n  \"recipient_name\": \"John Doe\",\n  \"recipient_phone\": \"01712345678\",\n  \"recipient_secondary_phone\": \"01787654321\",\n  \"recipient_address\": \"House 123, Road 4, Sector 10, Uttara, Dhaka-1230, Bangladesh\",\n  \"delivery_type\": 48,\n  \"item_type\": 2,\n  \"special_instruction\": \"Please deliver before 5 PM\",\n  \"item_quantity\": 1,\n  \"item_weight\": \"0.5\",\n  \"item_description\": \"Clothing items\",\n  \"amount_to_collect\": 900\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/pathao/order",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"order"
+							]
+						},
+						"description": "Create a Pathao delivery order for an existing order. Make sure the order_id exists in your system first."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Bulk Pathao Orders",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orders\": [\n    {\n      \"order_id\": \"ORD-TEST-001\",\n      \"recipient_name\": \"John Doe\",\n      \"recipient_phone\": \"01712345678\",\n      \"recipient_address\": \"House 123, Road 4, Sector 10, Uttara, Dhaka-1230, Bangladesh\"\n    },\n    {\n      \"order_id\": \"ORD-TEST-002\",\n      \"recipient_name\": \"Jane Smith\",\n      \"recipient_phone\": \"01787654321\",\n      \"recipient_address\": \"House 456, Road 8, Dhanmondi, Dhaka-1205, Bangladesh\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/pathao/orders/bulk",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pathao",
+								"orders",
+								"bulk"
+							]
+						},
+						"description": "Create multiple Pathao orders at once (up to 50 orders)"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -207,6 +207,7 @@ model Order {
   payment         Payment?
   products        OrderItem[]
   notification    Notification?
+  pathao_order    PathaoOrder?
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
 
@@ -314,4 +315,29 @@ model StaticPage {
   updated_at  DateTime       @updatedAt
 
   @@map("static_pages")
+}
+
+model PathaoOrder {
+  id                  String   @id @default(uuid())
+  order_id            String   @unique
+  consignment_id      String?  @unique
+  merchant_order_id   String
+  recipient_name      String
+  recipient_phone     String
+  recipient_address   String
+  delivery_type       Int      @default(48)
+  item_type           Int      @default(2)
+  special_instruction String?
+  item_quantity       Int      @default(1)
+  item_weight         Float    @default(0.5)
+  item_description    String?
+  amount_to_collect   Int      @default(0)
+  delivery_fee        Float?
+  order_status        String?
+  pathao_status       String?
+  order               Order    @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  @@map("pathao_orders")
 }
