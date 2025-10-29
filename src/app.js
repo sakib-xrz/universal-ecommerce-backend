@@ -41,6 +41,20 @@ cron.schedule('0 0 * * *', () => {
 // routes
 app.use('/api/v1', router);
 
+// handle not found routes
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Not Found',
+        errorMessages: [
+            {
+                path: req.originalUrl,
+                message: 'API not found'
+            }
+        ]
+    });
+});
+
 // global error handler
 app.use(globalErrorHandler);
 

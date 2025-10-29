@@ -15,6 +15,8 @@ router
         ProductController.createProduct
     );
 
+router.get('/meta-feed', ProductController.metaFeed);
+
 router
     .route('/category/:slug')
     .get(ProductController.getProductsByCategory);

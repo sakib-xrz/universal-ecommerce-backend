@@ -7,6 +7,13 @@ const generateSlug = require('../utils/generateSlug.js');
 const calculatePagination = require('../helpers/calculatePagination.js');
 const pick = require('../utils/pick.js');
 
+const stripHtml = (html = '') => {
+    return String(html)
+        .replace(/<\/?[^>]+(>|$)/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+};
+
 const createProduct = catchAsync(async (req, res) => {
     let productData = req.body;
 
@@ -703,6 +710,209 @@ const deleteProduct = catchAsync(async (req, res) => {
     });
 });
 
+/**
+ * GET /api/products/meta-feed?format=csv|json
+ * Returns a Facebook Meta Catalog compatible feed (CSV by default).
+ */
+
+// const metaFeed = catchAsync(async (req, res) => {
+//     const format = (req.query.format || 'csv').toLowerCase();
+
+//     const products = await prisma.product.findMany({
+//         where: { is_deleted: false, is_published: true },
+//         include: {
+//             images: { orderBy: { created_at: 'asc' } },
+//             category: true,
+//             variants: true
+//         }
+//     });
+
+//     const rows = products.map(p => {
+//         const inStock = (p.variants || []).some(
+//             v => v.stock && v.stock > 0
+//         );
+//         const availability = inStock ? 'in stock' : 'out of stock';
+//         const image =
+//             p.images && p.images.length ? p.images[0].image_url : '';
+//         const price =
+//             typeof p.sell_price === 'number'
+//                 ? `${p.sell_price} BDT`
+//                 : '';
+//         const brand =
+//             p.category && p.category.name
+//                 ? p.category.name
+//                 : 'PurpleHouseBD';
+
+//         return {
+//             id: p.sku || p.id,
+//             title: p.name,
+//             description: stripHtml(
+//                 p.full_description || p.short_description || ''
+//             ),
+//             availability,
+//             condition: 'new',
+//             price,
+//             link: `https://purplehousebd.com/product/${p.slug}`,
+//             image_link: image,
+//             brand,
+//             mpn: '',
+//             gtin: ''
+//         };
+//     });
+
+//     if (format === 'json') {
+//         return res.json(rows);
+//     }
+
+//     const headers = [
+//         'id',
+//         'title',
+//         'description',
+//         'availability',
+//         'condition',
+//         'price',
+//         'link',
+//         'image_link',
+//         'brand',
+//         'mpn',
+//         'gtin'
+//     ];
+//     const escapeCsv = val => {
+//         if (val === null || val === undefined) return '';
+//         const s = String(val);
+//         if (
+//             s.includes('"') ||
+//             s.includes(',') ||
+//             s.includes('\n') ||
+//             s.includes('\r')
+//         ) {
+//             return `"${s.replace(/"/g, '""')}"`;
+//         }
+//         return s;
+//     };
+
+//     const csvLines = [headers.join(',')];
+//     for (const r of rows) {
+//         csvLines.push(headers.map(h => escapeCsv(r[h])).join(','));
+//     }
+//     const csv = csvLines.join('\r\n');
+
+//     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+//     res.setHeader(
+//         'Content-Disposition',
+//         'attachment; filename="facebook_meta_catalog.csv"'
+//     );
+//     return res.send(csv);
+// });
+
+const metaFeed = catchAsync(async (req, res) => {
+    const format = (req.query.format || 'csv').toLowerCase();
+
+    // disable caching to avoid conditional GET 304 responses
+    res.setHeader(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, private'
+    );
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    try {
+        res.removeHeader('ETag');
+    } catch (e) {
+        /* ignore */
+    }
+
+    const products = await prisma.product.findMany({
+        where: { is_deleted: false, is_published: true },
+        include: {
+            images: { orderBy: { created_at: 'asc' } },
+            category: true,
+            variants: true
+        }
+    });
+
+    const rows = products.map(p => {
+        const inStock = (p.variants || []).some(
+            v => v.stock && v.stock > 0
+        );
+        const availability = inStock ? 'in stock' : 'out of stock';
+        const image =
+            p.images && p.images.length ? p.images[0].image_url : '';
+        const price =
+            typeof p.sell_price === 'number'
+                ? `${p.sell_price} BDT`
+                : '';
+        const brand =
+            p.category && p.category.name
+                ? p.category.name
+                : 'PurpleHouseBD';
+
+        return {
+            id: p.sku || p.id,
+            title: p.name,
+            description: stripHtml(
+                p.full_description || p.short_description || ''
+            ),
+            availability,
+            condition: 'new',
+            price,
+            link: `https://purplehousebd.com/product/${p.slug}`,
+            image_link: image,
+            brand,
+            mpn: '',
+            gtin: ''
+        };
+    });
+
+    if (format === 'json') {
+        return sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: 'Meta feed generated successfully',
+            data: rows
+        });
+    }
+
+    const headers = [
+        'id',
+        'title',
+        'description',
+        'availability',
+        'condition',
+        'price',
+        'link',
+        'image_link',
+        'brand',
+        'mpn',
+        'gtin'
+    ];
+    const escapeCsv = val => {
+        if (val === null || val === undefined) return '';
+        const s = String(val);
+        if (
+            s.includes('"') ||
+            s.includes(',') ||
+            s.includes('\n') ||
+            s.includes('\r')
+        ) {
+            return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+    };
+
+    const csvLines = [headers.join(',')];
+    for (const r of rows) {
+        csvLines.push(headers.map(h => escapeCsv(r[h])).join(','));
+    }
+    const csv = csvLines.join('\r\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="facebook_meta_catalog.csv"'
+    );
+    return res.send(csv);
+});
+
 const ProductController = {
     createProduct,
     getProductsByCategory,
@@ -712,7 +922,8 @@ const ProductController = {
     getAdminProduct,
     updateProduct,
     updatePublishedStatus,
-    deleteProduct
+    deleteProduct,
+    metaFeed
 };
 
 module.exports = ProductController;
